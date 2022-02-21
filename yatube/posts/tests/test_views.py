@@ -222,7 +222,7 @@ class PostPagesTests(TestCase):
 
     def test_follow_for_authorized_user(self):
         follows_count = Follow.objects.count()
-        self.authorized_client.get(
+        self.authorized_client.post(
             reverse('posts:profile_follow',
                     kwargs={'username': self.user})
         )
@@ -233,19 +233,19 @@ class PostPagesTests(TestCase):
 
     def test_follow_for_non_authorized_user(self):
         follows_count = Follow.objects.count()
-        self.guest_client.get(
+        self.guest_client.post(
             reverse('posts:profile_follow',
                     kwargs={'username': self.user})
         )
         self.assertEqual(Follow.objects.count(), follows_count)
 
     def test_unfollow_for_authorized_user(self):
-        self.authorized_client.get(
+        self.authorized_client.post(
             reverse('posts:profile_follow',
                     kwargs={'username': self.user})
         )
         follows_count = Follow.objects.count()
-        self.authorized_client.get(
+        self.authorized_client.post(
             reverse('posts:profile_unfollow',
                     kwargs={'username': self.user})
         )
@@ -259,7 +259,7 @@ class PostPagesTests(TestCase):
             author=self.user_non_follower,
             text='Тест подписки другой автор',
         )
-        self.authorized_client.get(
+        self.authorized_client.post(
             reverse('posts:profile_follow',
                     kwargs={'username': self.user})
         )
@@ -274,7 +274,7 @@ class PostPagesTests(TestCase):
             response.context['page_obj'][0].text,
             'Тест подписки'
         )
-        self.authorized_author.get(
+        self.authorized_author.post(
             reverse('posts:profile_follow',
                     kwargs={'username': self.user_non_follower})
         )
@@ -288,7 +288,7 @@ class PostPagesTests(TestCase):
 
     def test_follow_auth(self):
         follows_count = Follow.objects.count()
-        self.authorized_author.get(
+        self.authorized_author.post(
             reverse('posts:profile_follow',
                     kwargs={'username': self.user})
         )

@@ -68,6 +68,9 @@ class Comment(CreatedModel):
         help_text='Введите текст комментария'
     )
 
+    def __str__(self):
+        return self.text
+
 
 class Follow(models.Model):
     user = models.ForeignKey(

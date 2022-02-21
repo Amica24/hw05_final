@@ -46,9 +46,25 @@
           <div class="card-body">
             <form method="post" action="{% url 'posts:add_comment' post.id %}">
               {% csrf_token %}
+              {% for field in form %}
               <div class="form-group mb-2">
-                {{ form.text|addclass:"form-control" }}
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                      {% if field.field.required %}
+                        <span class="required text-danger">*</span>
+                      {% endif %}
+                </label>
+                {{ field|addclass:"form-control" }}
+                {% if field.help_text %}
+                  <small
+                     id="{{ field.id_for_label }}-help"
+                     class="form-text text-muted"
+                  >
+                    {{ field.help_text|safe }}
+                  </small>
+                {% endif %}
               </div>
+              {% endfor %}
               <button type="submit" class="btn btn-primary">Отправить</button>
             </form>
           </div>

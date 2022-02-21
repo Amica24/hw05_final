@@ -48,14 +48,11 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts_num = author.posts.count()
-    if request.user.is_authenticated:
-        if Follow.objects.filter(
+    if request.user.is_authenticated and Follow.objects.filter(
             user=request.user,
             author=author
-        ).exists():
-            following = True
-        else:
-            following = False
+    ).exists():
+        following = True
     else:
         following = False
     context = {
@@ -154,16 +151,12 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    follows = Follow.objects.filter(user=request.user)
-    authors = []
-    for obj in follows:
-        authors.append(obj.author)
     title = 'Поcты избранных авторов'
     context = {
         'title': title,
     }
     context.update(get_page_context(
-        Post.objects.filter(author__in=authors),
+        Post.objects.filter(author__following__user=request.user),
         request
     ))
     return render(
@@ -187,8 +180,10 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    Follow.objects.filter(
+    follow = Follow.objects.filter(
         user=request.user,
         author=author
-    ).delete()
+    )
+    if follow.exists():
+        follow.delete()
     return redirect('posts:profile', username=username)
