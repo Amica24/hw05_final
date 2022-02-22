@@ -37,31 +37,64 @@ class PostModelTest(TestCase):
         expected_post_name = post.text[:15]
         expected_comment_name = comment.text
         expected_follow_user_name = follow.user.username
-        self.assertEqual(expected_group_name, str(group))
-        self.assertEqual(expected_post_name, str(post))
-        self.assertEqual(expected_comment_name, str(comment))
-        self.assertEqual(expected_follow_user_name, self.follower.username)
+        models = {
+            post: expected_post_name,
+            group: expected_group_name,
+            comment: expected_comment_name,
+        }
+        for value, expected in models.items():
+            with self.subTest(value=value):
+                self.assertEqual(str(value), expected)
+        self.assertEqual(self.follower.username, expected_follow_user_name)
 
-    def test_verbose_name(self):
+    def test_verbose_name_post(self):
         post = PostModelTest.post
         field_verboses = {
             'text': 'Текст поста',
             'pub_date': 'Дата публикации',
             'author': 'Автор',
             'group': 'Группа',
+            'image': 'Картинка',
         }
         for field, expected_value in field_verboses.items():
             with self.subTest(field=field):
                 self.assertEqual(
                     post._meta.get_field(field).verbose_name, expected_value)
 
-    def test_help_text(self):
+    def test_verbose_name_group(self):
+        group = PostModelTest.group
+        self.assertEqual(
+            group._meta.get_field('title').verbose_name, 'Группа'
+        )
+
+    def test_verbose_name_comment(self):
+        comment = PostModelTest.comment
+        self.assertEqual(
+            comment._meta.get_field('text').verbose_name, 'Текст комментария'
+        )
+
+    def test_help_text_post(self):
         post = PostModelTest.post
         field_help_texts = {
             'text': 'Введите текст поста',
             'group': 'Выберите группу',
+            'image': 'Загрузите изображение с вашего компьютера',
         }
         for field, expected_value in field_help_texts.items():
             with self.subTest(field=field):
                 self.assertEqual(
                     post._meta.get_field(field).help_text, expected_value)
+
+    def test_help_text_group(self):
+        group = PostModelTest.group
+        self.assertEqual(
+            group._meta.get_field('title').help_text,
+            'Группа, к которой будет относиться пост'
+        )
+
+    def test_help_text_comment(self):
+        comment = PostModelTest.comment
+        self.assertEqual(
+            comment._meta.get_field('text').help_text,
+            'Введите текст комментария'
+        )

@@ -9,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from ..models import Post, Group, User, Follow
+from ..models import Post, Group, User, Follow, Comment
 from ..forms import PostForm
 
 
@@ -96,6 +96,7 @@ class PostPagesTests(TestCase):
         response = self.guest_client.get(reverse('posts:index'))
         first_post = response.context['page_obj'][1]
         self.assertEqual(first_post, self.post)
+        self.assertEqual(first_post.image, self.post.image)
         self.assertEqual(response.context['title'],
                          'Последние обновления на сайте')
 
@@ -106,6 +107,7 @@ class PostPagesTests(TestCase):
         )
         first_post = response.context['page_obj'][0]
         self.assertEqual(first_post, self.post)
+        self.assertEqual(first_post.image, self.post.image)
         self.assertEqual(response.context['group'], self.post.group)
 
     def test_profile_page_show_correct_context(self):
@@ -119,6 +121,7 @@ class PostPagesTests(TestCase):
         )
         first_post = response.context['page_obj'][0]
         self.assertEqual(first_post, self.post)
+        self.assertEqual(first_post.image, self.post.image)
         self.assertEqual(
             response.context['author'].username, self.post.author.username
         )
@@ -130,6 +133,7 @@ class PostPagesTests(TestCase):
                                           kwargs={'post_id': self.post.id}))
         )
         self.assertEqual(response.context['post'], self.post)
+        self.assertEqual(response.context['post'].image, self.post.image)
         self.assertEqual(response.context['posts_num'], self.post_num)
         self.assertEqual(response.context['post_id'], self.post.id)
 
@@ -142,12 +146,14 @@ class PostPagesTests(TestCase):
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
+            'image': forms.fields.ImageField,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
                 form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
         self.assertEqual(response.context['post'], self.post)
+        self.assertEqual(response.context['post'].image, self.post.image)
         self.assertEqual(response.context['title'], 'Редактировать пост')
         self.assertIsInstance(response.context['form'], PostForm)
         self.assertIsInstance(response.context['is_edit'], bool)
@@ -158,6 +164,7 @@ class PostPagesTests(TestCase):
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
+            'image': forms.fields.ImageField,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
@@ -219,6 +226,33 @@ class PostPagesTests(TestCase):
         cache.clear()
         response = self.guest_client.get(reverse('posts:index'))
         self.assertNotEqual(response.content, cache_with_post)
+
+    def test_comment_form_for_unauthorized_user(self):
+        comment_count = Comment.objects.count()
+        form_data = {
+            'text': 'Тестовый комментарий проверка формы',
+        }
+        response = self.guest_client.post(
+            reverse('posts:add_comment', kwargs={'post_id': self.post.id}),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(
+            response,
+            '{}?next={}'.format(
+                reverse('users:login'),
+                reverse(
+                    'posts:add_comment',
+                    kwargs={'post_id': self.post.id}
+                )
+            )
+        )
+        self.assertEqual(Comment.objects.count(), comment_count)
+        self.assertFalse(
+            Comment.objects.filter(
+                text='Тестовый комментарий проверка формы'
+            ).exists()
+        )
 
     def test_follow_for_authorized_user(self):
         follows_count = Follow.objects.count()

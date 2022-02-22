@@ -7,7 +7,11 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(
+        'Группа',
+        help_text='Группа, к которой будет относиться пост',
+        max_length=200
+    )
     slug = models.SlugField(max_length=50, unique=True)
     description = models.TextField()
 
@@ -42,7 +46,8 @@ class Post(models.Model):
     image = models.ImageField(
         'Картинка',
         upload_to='posts/',
-        blank=True
+        blank=True,
+        help_text='Загрузите изображение с вашего компьютера'
     )
 
     def __str__(self):

@@ -212,33 +212,6 @@ class PostCreateFormTests(TestCase):
             ).exists()
         )
 
-    def test_comment_form_for_unauthorized_user(self):
-        comment_count = Comment.objects.count()
-        form_data = {
-            'text': 'Тестовый комментарий проверка формы',
-        }
-        response = self.guest_client.post(
-            reverse('posts:add_comment', kwargs={'post_id': self.post.id}),
-            data=form_data,
-            follow=True
-        )
-        self.assertRedirects(
-            response,
-            '{}?next={}'.format(
-                reverse('users:login'),
-                reverse(
-                    'posts:add_comment',
-                    kwargs={'post_id': self.post.id}
-                )
-            )
-        )
-        self.assertEqual(Comment.objects.count(), comment_count)
-        self.assertFalse(
-            Comment.objects.filter(
-                text='Тестовый комментарий проверка формы'
-            ).exists()
-        )
-
     def test_validaiton_fail(self):
         posts_count = Post.objects.count()
         form_data = {
