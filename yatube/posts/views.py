@@ -48,10 +48,13 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts_num = author.posts.count()
-    following = request.user.is_authenticated and Follow.objects.filter(
+    following = (
+        request.user.is_authenticated
+        and Follow.objects.filter(
             user=request.user,
             author=author
-    ).exists()
+        ).exists()
+    )
     context = {
         'author': author,
         'posts_num': posts_num,
