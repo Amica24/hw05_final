@@ -6,6 +6,7 @@ from django import forms
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.fields.files import ImageFieldFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
@@ -177,6 +178,7 @@ class PostPagesTests(TestCase):
         form_data = {
             'text': 'Тестовый пост проверка формы',
             'group': self.post.group.pk,
+            'image': self.post.image,
         }
         self.authorized_client.post(
             reverse('posts:post_create'),
@@ -199,7 +201,10 @@ class PostPagesTests(TestCase):
                     response.context['page_obj'][0].group.pk,
                     self.post.group.pk
                 )
-
+                self.assertIsInstance(
+                    response.context['page_obj'][0].image,
+                    ImageFieldFile
+                )
         response = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': self.group_other.slug})
         )
