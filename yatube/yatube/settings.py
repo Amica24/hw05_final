@@ -4,7 +4,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
-SECRET_KEY = '59ax*ajmy$zh@-lm5josj+t7=bzbxjit$73+i3z$xf(@et0x$r'
+SECRET_KEY = ''
 
 DEBUG = True
 
