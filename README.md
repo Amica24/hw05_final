@@ -30,7 +30,7 @@ git clone git@github.com:Amica24/hw05_final.git
 ```
 
 ```
-cd yatube
+cd hw05_final
 ```
 
 Cоздать и активировать виртуальное окружение:
